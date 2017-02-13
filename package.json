@@ -22,8 +22,10 @@
     ]
   },
   "dependencies": {
+    "axios": "^0.15.3",
     "babel-cli": "^6.18.0",
     "babel-runtime": "^6.11.6",
+    "commander": "^2.9.0",
     "readline-sync": "^1.4.5"
   },
   "devDependencies": {
@@ -46,7 +48,8 @@
     "eslint-plugin-import": "^2.2.0",
     "flow-bin": "^0.37",
     "flow-typed": "^2.0.0",
-    "jest": "^18.1.0"
+    "jest": "^18.1.0",
+    "nock": "^9.0.5"
   },
   "scripts": {
     "test": "jest",
@@ -57,15 +60,14 @@
     "build": "NODE_ENV=production babel src --out-dir dist --source-maps inline",
     "prepublish": "npm run build"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/CountJr/project-lvl3-s14.git"
-  },
+  "repository": "git+https://github.com/CountJr/project-lvl3-s14.git",
   "jest": {
     "testRegex": "(/__tests__/.*|(\\.|/)(Test|spec))\\.jsx?$",
     "testEnvironment": "node",
     "collectCoverage": "true",
     "coverageDirectory": "tmp",
-    "coverageReporters": ["lcov"]
+    "coverageReporters": [
+      "lcov"
+    ]
   }
 }
