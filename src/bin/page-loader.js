@@ -3,6 +3,7 @@
  */
 import commander from 'commander';
 import pjson from '../../package.json';
+import loader from '../index';
 
 commander
   .version(pjson.version)
@@ -10,7 +11,7 @@ commander
   .option('--output [dir]', 'Output directory', './')
   .arguments('<url>')
   .action((url) => {
-    console.log(url);
+    loader(url).then(res => console.log(res));
   });
 
 commander

@@ -5,10 +5,12 @@
 import nock from 'nock';
 import loader from '../src/index';
 
-const mockHexlet = nock('http://count.cz')
+const webPageContents = '<h1>get it!</h1>';
+
+nock('http://count.cz')
   .get('/courses')
-  .reply(200, 'get it!');
+  .reply(200, webPageContents);
 
 test('begin', () => {
-  loader('http://count.cz/courses').then(res => expect(res).toEqual('get it!'));
+  loader('http://count.cz/courses').then(res => expect(res).toEqual(webPageContents));
 });
