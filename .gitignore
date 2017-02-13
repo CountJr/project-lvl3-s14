@@ -1,0 +1,12 @@
+.DS_Store
+tmp
+.vagrant
+node_modules
+dist
+.vscode
+.babelrc
+.codeclimate.yml
+.eslintignore
+.eslintrc.yml
+.flowconfig
+.idea/
