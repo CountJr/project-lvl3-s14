@@ -11,7 +11,7 @@ commander
   .option('--output [dir]', 'Output directory', './')
   .arguments('<url>')
   .action((url) => {
-    loader(url).then(res => console.log(res));
+    loader(url, commander.output).then(res => console.log(res));
   });
 
 commander
