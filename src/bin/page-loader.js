@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * Created by count on 13/02/17.
  */
@@ -11,7 +12,7 @@ commander
   .option('--output [dir]', 'Output directory', './')
   .arguments('<url>')
   .action((url) => {
-    loader(url, commander.output).then(res => console.log(res));
+    loader(url, commander.output);
   });
 
 commander

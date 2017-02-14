@@ -8,6 +8,6 @@ import path from 'path';
 
 export const writeFile = (fileName, fileData) => fs.writeFileSync(fileName, fileData);
 
-export const makeFileName = (filePath, url) =>
+export const buildFileName = (filePath, url) =>
   `${path.join(filePath, url.replace(/https?:\/\//g, '').replace(/[^A-Za-z]/g, '-'))}.html`;
 

@@ -4,11 +4,11 @@
 // @flow
 
 import axios from 'axios';
-import { writeFile, makeFileName } from './io';
+import { writeFile, buildFileName } from './io';
 
 const loader = (url, path) => axios.get(url)
   .then((response) => {
-    const fileName = makeFileName(path, url);
+    const fileName = buildFileName(path, url);
     writeFile(fileName, response.data);
   },
   )
