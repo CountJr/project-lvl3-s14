@@ -5,9 +5,13 @@
 
 import fs from 'fs';
 import path from 'path';
+import mkdirp from 'mkdirp';
+
+export const buildTargetPath = (targetPath) => {
+  const fullPath = path.resolve(__dirname, targetPath);
+  mkdirp.sync(fullPath);
+  return fullPath;
+};
 
 export const writeFile = (fileName, fileData) => fs.writeFileSync(fileName, fileData);
-
-export const buildFileName = (filePath, url) =>
-  `${path.join(filePath, url.replace(/https?:\/\//g, '').replace(/[^A-Za-z]/g, '-'))}.html`;
 

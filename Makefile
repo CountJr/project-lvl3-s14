@@ -27,3 +27,8 @@ publish:
 	npm publish
 
 .PHONY: test
+
+bab:
+	rm -rf tmp
+	mkdir tmp
+	babel-node ./src/bin/page-loader.js --output ./tmp/bab http://count.cz/very-big.one.html
