@@ -48,7 +48,13 @@ const loader = async (sourceUrl, targetPath = '.') => {
       path.join(targetPath, config.filePath, path.basename(link))));
     return Promise.resolve('done');
   } catch (e) {
-    return Promise.reject(e);
+    if (e.code === 'ENOENT') {
+      return Promise.reject(`Error: Taz can't find file or folder ${e.path}`);
+    }
+    if (e.response) {
+      return Promise.reject(`Error: Taz scared of ${e.response.status} from ${e.response.config.url}`);
+    }
+    return Promise.reject(`Error: Taz confused. He found '${e}'`);
   }
 };
 

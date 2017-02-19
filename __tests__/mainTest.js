@@ -69,7 +69,38 @@ test('2nd step tests', async (done) => {
   }
 });
 
-test('4th step. looooots of errors expected', async (done) => {
-  expect(true).toBe(true);
+test('4th step. 404 error', async (done) => {
+  nock('http://count.cz')
+    .get('/very-big.one.html')
+    .reply(404);
+
+  const tempDir = fs.mkdtempSync(`${os.tmpdir()}${path.sep}`);
+  const url = 'http://count.cz/very-big.one.html';
+
+  try {
+    await loader(url, tempDir);
+    done();
+  } catch (e) {
+    expect(e).toBe('Error: Taz scared of 404 from http://count.cz/very-big.one.html');
+    done(e);
+  }
+  done();
+});
+
+test('4th step. read/write error', async (done) => {
+  nock('http://count.cz')
+    .get('/very-big.one.html')
+    .reply(200);
+
+  const tempDir = '/asdasd/asdasd';
+  const url = 'http://count.cz/very-big.one.html';
+
+  try {
+    await loader(url, tempDir);
+    done();
+  } catch (e) {
+    expect(e).toBe('Error: Taz can\'t find file or folder /asdasd/asdasd/count-cz-very-big-one-html_files');
+    done(e);
+  }
   done();
 });
