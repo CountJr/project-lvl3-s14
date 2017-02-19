@@ -9,9 +9,8 @@ import mkdirp from 'mkdirp';
 
 export const buildTargetPath = (targetPath) => {
   const fullPath = path.resolve(__dirname, targetPath);
-  mkdirp.sync(fullPath);
+  mkdirp(fullPath);
   return fullPath;
 };
 
-export const writeFile = (fileName, fileData) => fs.writeFile(fileName, fileData);
-
+export const writeFile = (p, c) => fs.writeFile(p, c);

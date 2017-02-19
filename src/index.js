@@ -8,7 +8,7 @@ import fs from 'mz/fs';
 import os from 'os';
 import url from 'url';
 import path from 'path';
-import { buildTargetPath } from './io';
+import { buildTargetPath, writeFile } from './io';
 import parser from './parser';
 
 const parseUrl = (sourceUrl, targetPath) => {
@@ -23,8 +23,6 @@ const parseUrl = (sourceUrl, targetPath) => {
     baseUrl: parsedUrl.href.replace(parsedUrl.pathname, ''),
   };
 };
-
-const writeFile = (p, c) => fs.writeFile(p, c);
 
 const loader = async (sourceUrl, targetPath = '.') => {
   // TODO: refuse if target exists or unavaible, check for tmp.
@@ -43,8 +41,8 @@ const loader = async (sourceUrl, targetPath = '.') => {
     axios.get(link, { baseURL: config.baseUrl, responseType: 'arraybuffer' })
       .then(response => writeFile(path.join(tmpFolder,
           config.filePath, path.basename(link)), response.data));
-  await Promise.all(links.map(load))
-    .then(() => fs.readdir(path.join(tmpFolder, config.filePath)));
+  await Promise.all(links.map(load));
+  // TODO: recursive move files routing needed
   await fs.rename(path.join(tmpFolder, config.filename), path.join(targetPath, config.filename));
   await links.map(link => fs.rename(path.join(tmpFolder, config.filePath, path.basename(link)),
             path.join(targetPath, config.filePath, path.basename(link))));
