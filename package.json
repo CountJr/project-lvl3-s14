@@ -31,6 +31,7 @@
     "lodash": "^4.17.4",
     "mkdirp": "^0.5.1",
     "mz": "^2.6.0",
+    "ncp": "^2.0.0",
     "readline-sync": "^1.4.5",
     "rimraf": "^2.5.4"
   },
@@ -40,6 +41,7 @@
     "babel-eslint": "^7.0.0",
     "babel-jest": "^18.0.0",
     "babel-plugin-syntax-flow": "^6.18.0",
+    "babel-plugin-transform-async-to-generator": "^6.22.0",
     "babel-plugin-transform-flow-strip-types": "^6.21.0",
     "babel-plugin-transform-runtime": "^6.15.0",
     "babel-polyfill": "^6.20.0",

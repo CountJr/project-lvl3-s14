@@ -4,10 +4,11 @@
 // @flow
 
 import axios from 'axios';
-import fs from 'fs';
+import fs from 'mz/fs';
+import os from 'os';
 import url from 'url';
 import path from 'path';
-import { writeFile, buildTargetPath } from './io';
+import { buildTargetPath } from './io';
 import parser from './parser';
 
 const parseUrl = (sourceUrl, targetPath) => {
@@ -23,26 +24,28 @@ const parseUrl = (sourceUrl, targetPath) => {
   };
 };
 
-const dlFiles = (links, config) => {
-  const load = (link) => {
+const writeFile = (p, c) => fs.writeFile(p, c);
+
+const loader = async (sourceUrl, targetPath = '.') => {
+  const tmpFolder = await fs.mkdtemp(`${os.tmpdir()}${path.sep}`);
+  const config = await parseUrl(sourceUrl, targetPath);
+  const resp = await axios.get(sourceUrl);
+  const [parsedPage, links] = await parser(resp.data, config.filePath);
+  await writeFile(path.join(tmpFolder, config.filename), parsedPage);
+  await fs.mkdir(path.join(tmpFolder, config.filePath));
+  await fs.mkdir(path.join(targetPath, config.filePath));
+  const load = link =>
     axios.get(link, { baseURL: config.baseUrl, responseType: 'arraybuffer' })
-      .then(response =>
-        writeFile(path.join(config.outputPath,
-          config.filePath, path.basename(link)), response.data));
-  };
-  return Promise.all(links.map(load));
+      .then(response => writeFile(path.join(tmpFolder,
+          config.filePath, path.basename(link)), response.data))
+      .then(() => {
+        fs.rename(path.join(tmpFolder, config.filePath, path.basename(link)),
+          path.join(targetPath, config.filePath, path.basename(link)));
+      });
+  await Promise.all(links.map(load))
+    .then(() => fs.readdir(path.join(tmpFolder, config.filePath)));
+  await fs.rename(path.join(tmpFolder, config.filename), path.join(targetPath, config.filename));
 };
-
-const loader = (sourceUrl, targetPath = '.') =>
-  axios.get(sourceUrl)
-    .then((resp) => {
-      const config = parseUrl(sourceUrl, targetPath);
-      const [parsedPage, links] = parser(resp.data, config.filePath);
-      writeFile(path.join(config.outputPath, config.filename), parsedPage);
-      fs.mkdirSync(path.join(config.outputPath, config.filePath));
-
-      return dlFiles(links, config);
-    });
 
 
 export default loader;

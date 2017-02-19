@@ -13,5 +13,5 @@ export const buildTargetPath = (targetPath) => {
   return fullPath;
 };
 
-export const writeFile = (fileName, fileData) => fs.writeFileSync(fileName, fileData);
+export const writeFile = (fileName, fileData) => fs.writeFile(fileName, fileData);
 
