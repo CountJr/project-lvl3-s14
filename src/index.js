@@ -27,24 +27,27 @@ const parseUrl = (sourceUrl, targetPath) => {
 const writeFile = (p, c) => fs.writeFile(p, c);
 
 const loader = async (sourceUrl, targetPath = '.') => {
+  // TODO: refuse if target exists or unavaible, check for tmp.
   const tmpFolder = await fs.mkdtemp(`${os.tmpdir()}${path.sep}`);
   const config = await parseUrl(sourceUrl, targetPath);
+  // TODO: catch failed download from http
   const resp = await axios.get(sourceUrl);
+  // TODO: any errors in parse??? have to think about.
   const [parsedPage, links] = await parser(resp.data, config.filePath);
+  // TODO: yoooohooooo!!!
   await writeFile(path.join(tmpFolder, config.filename), parsedPage);
+  // TODO: same as previous
   await fs.mkdir(path.join(tmpFolder, config.filePath));
   await fs.mkdir(path.join(targetPath, config.filePath));
   const load = link =>
     axios.get(link, { baseURL: config.baseUrl, responseType: 'arraybuffer' })
       .then(response => writeFile(path.join(tmpFolder,
-          config.filePath, path.basename(link)), response.data))
-      .then(() => {
-        fs.rename(path.join(tmpFolder, config.filePath, path.basename(link)),
-          path.join(targetPath, config.filePath, path.basename(link)));
-      });
+          config.filePath, path.basename(link)), response.data));
   await Promise.all(links.map(load))
     .then(() => fs.readdir(path.join(tmpFolder, config.filePath)));
   await fs.rename(path.join(tmpFolder, config.filename), path.join(targetPath, config.filename));
+  await links.map(link => fs.rename(path.join(tmpFolder, config.filePath, path.basename(link)),
+            path.join(targetPath, config.filePath, path.basename(link))));
 };
 
 
