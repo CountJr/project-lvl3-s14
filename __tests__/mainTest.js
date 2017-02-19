@@ -3,17 +3,17 @@
  */
 // @flow
 
-import fs from 'fs';
+import fs from 'mz/fs';
 import os from 'os';
 import path from 'path';
 import nock from 'nock';
 import loader from '../src/';
 
-beforeAll(() => {
+beforeEach(() => {
   nock.disableNetConnect();
 });
 
-test('1st step tests', (done) => {
+test('1st step tests', async (done) => {
   const webPageContents = '<h1>get it!</h1>';
   const tempDir = fs.mkdtempSync(`${os.tmpdir()}${path.sep}`);
   const fileName = 'count-cz-courses-html.html';
@@ -23,15 +23,14 @@ test('1st step tests', (done) => {
     .get(/.*/)
     .reply(200, webPageContents);
 
-  loader(url, tempDir)
-    .then(() => {
-      expect(fs.accessSync(path.join(tempDir, fileName))).toBeFalsy();
-      expect(fs.readFileSync(path.join(tempDir, fileName), 'utf-8')).toEqual(webPageContents);
-      done();
-    })
-    .catch((e) => {
-      done.fail(e);
-    });
+  try {
+    await loader(url, tempDir);
+    expect(await fs.access(path.join(tempDir, fileName))).toBeFalsy();
+    expect(await fs.readFile(path.join(tempDir, fileName), 'utf-8')).toEqual(webPageContents);
+    done();
+  } catch (e) {
+    done.fail(e);
+  }
 });
 
 test('2nd step tests', async (done) => {
@@ -58,9 +57,12 @@ test('2nd step tests', async (done) => {
   const expected = fs.readFileSync(path.join(__dirname, 'fixtures', 'very-big-expect.html'), 'utf-8');
 
   try {
-    await loader(url, tempDir);
-    expect(fs.readFileSync(path.join(tempDir, fileName), 'utf-8')).toEqual(expected);
-    expect(fs.readdirSync(path.join(tempDir, folderName)).length).toBe(4);
+    const result = await loader(url, tempDir);
+    const mainFile = await fs.readFile(path.join(tempDir, fileName), 'utf-8');
+    const subFiles = await fs.readdir(path.join(tempDir, folderName));
+    expect(mainFile).toEqual(expected);
+    expect(subFiles.length).toBe(4);
+    expect(result).toBe('done');
     done();
   } catch (e) {
     done.fail(e);

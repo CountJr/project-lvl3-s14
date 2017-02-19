@@ -8,7 +8,6 @@ import fs from 'mz/fs';
 import os from 'os';
 import url from 'url';
 import path from 'path';
-import { buildTargetPath, writeFile } from './io';
 import parser from './parser';
 
 const parseUrl = (sourceUrl, targetPath) => {
@@ -19,33 +18,38 @@ const parseUrl = (sourceUrl, targetPath) => {
     baseFilename: baseFileName,
     filename: `${baseFileName}.html`,
     filePath: `${baseFileName}_files`,
-    outputPath: buildTargetPath(targetPath),
+    outputPath: path.resolve(__dirname, targetPath),
     baseUrl: parsedUrl.href.replace(parsedUrl.pathname, ''),
   };
 };
 
 const loader = async (sourceUrl, targetPath = '.') => {
-  // TODO: refuse if target exists or unavaible, check for tmp.
-  const tmpFolder = await fs.mkdtemp(`${os.tmpdir()}${path.sep}`);
-  const config = await parseUrl(sourceUrl, targetPath);
-  // TODO: catch failed download from http
-  const resp = await axios.get(sourceUrl);
-  // TODO: any errors in parse??? have to think about.
-  const [parsedPage, links] = await parser(resp.data, config.filePath);
-  // TODO: yoooohooooo!!!
-  await writeFile(path.join(tmpFolder, config.filename), parsedPage);
-  // TODO: same as previous
-  await fs.mkdir(path.join(tmpFolder, config.filePath));
-  await fs.mkdir(path.join(targetPath, config.filePath));
-  const load = link =>
-    axios.get(link, { baseURL: config.baseUrl, responseType: 'arraybuffer' })
-      .then(response => writeFile(path.join(tmpFolder,
+  try {
+    // TODO: refuse if target exists or unavaible, check for tmp.
+    const tmpFolder = await fs.mkdtemp(`${os.tmpdir()}${path.sep}`);
+    const config = parseUrl(sourceUrl, targetPath);
+    // TODO: catch failed download from http
+    const resp = await axios.get(sourceUrl);
+    // TODO: any errors in parse??? have to think about.
+    const [parsedPage, links] = parser(resp.data, config.filePath);
+    // TODO: yoooohooooo!!!
+    fs.writeFile(path.join(tmpFolder, config.filename), parsedPage);
+    // TODO: same as previous
+    await fs.mkdir(path.join(tmpFolder, config.filePath));
+    await fs.mkdir(path.join(targetPath, config.filePath));
+    const load = link =>
+      axios.get(link, { baseURL: config.baseUrl, responseType: 'arraybuffer' })
+        .then(response => fs.writeFile(path.join(tmpFolder,
           config.filePath, path.basename(link)), response.data));
-  await Promise.all(links.map(load));
-  // TODO: recursive move files routing needed
-  await fs.rename(path.join(tmpFolder, config.filename), path.join(targetPath, config.filename));
-  await links.map(link => fs.rename(path.join(tmpFolder, config.filePath, path.basename(link)),
-            path.join(targetPath, config.filePath, path.basename(link))));
+    await Promise.all(links.map(load));
+    // TODO: recursive move files routing needed
+    fs.rename(path.join(tmpFolder, config.filename), path.join(targetPath, config.filename));
+    links.map(link => fs.rename(path.join(tmpFolder, config.filePath, path.basename(link)),
+      path.join(targetPath, config.filePath, path.basename(link))));
+    return Promise.resolve('done');
+  } catch (e) {
+    return Promise.reject(e);
+  }
 };
 
 

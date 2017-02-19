@@ -8,7 +8,6 @@ import path from 'path';
 
 const parseMap = {
   link: 'href',
-
   script: 'src',
 };
 

@@ -11,8 +11,13 @@ commander
   .description(pjson.description)
   .option('--output [dir]', 'Output directory', './')
   .arguments('<url>')
-  .action((url) => {
-    loader(url, commander.output);
+  .action(async (url) => {
+    try {
+      const result = await loader(url, commander.output);
+      console.log(result);
+    } catch (e) {
+      console.log(e);
+    }
   });
 
 commander
