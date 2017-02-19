@@ -33,7 +33,7 @@ const loader = async (sourceUrl, targetPath = '.') => {
     // TODO: any errors in parse??? have to think about.
     const [parsedPage, links] = parser(resp.data, config.filePath);
     // TODO: yoooohooooo!!!
-    fs.writeFile(path.join(tmpFolder, config.filename), parsedPage);
+    await fs.writeFile(path.join(tmpFolder, config.filename), parsedPage);
     // TODO: same as previous
     await fs.mkdir(path.join(tmpFolder, config.filePath));
     await fs.mkdir(path.join(targetPath, config.filePath));
@@ -43,9 +43,11 @@ const loader = async (sourceUrl, targetPath = '.') => {
           config.filePath, path.basename(link)), response.data));
     await Promise.all(links.map(load));
     // TODO: recursive move files routing needed
-    fs.rename(path.join(tmpFolder, config.filename), path.join(targetPath, config.filename));
-    links.map(link => fs.rename(path.join(tmpFolder, config.filePath, path.basename(link)),
-      path.join(targetPath, config.filePath, path.basename(link))));
+    await fs.rename(path.join(tmpFolder, config.filename), path.join(targetPath, config.filename));
+    const moveSubFiles = link => fs.rename(
+      path.join(tmpFolder, config.filePath, path.basename(link)),
+      path.join(targetPath, config.filePath, path.basename(link)));
+    await Promise.all(links.map(moveSubFiles));
     return Promise.resolve('done');
   } catch (e) {
     if (e.code === 'ENOENT') {
