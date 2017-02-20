@@ -30,6 +30,7 @@
     "commander": "^2.9.0",
     "lodash": "^4.17.4",
     "mkdirp": "^0.5.1",
+    "multispinner": "^0.2.1",
     "mz": "^2.6.0",
     "ncp": "^2.0.0",
     "readline-sync": "^1.4.5",

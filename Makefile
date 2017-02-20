@@ -30,5 +30,5 @@ publish:
 
 bab:
 	rm -rf tmp
-	mkdir tmp
-	babel-node ./src/bin/page-loader.js --output ./tmp/bab http://count.cz/very-big.one.html
+	mkdir -p tmp/bab/
+	babel-node ./src/bin/page-loader.js --output ./tmp/bab http://hexlet.io

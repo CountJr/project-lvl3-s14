@@ -8,6 +8,7 @@ import fs from 'mz/fs';
 import os from 'os';
 import url from 'url';
 import path from 'path';
+import Multispinner from 'multispinner';
 import parser from './parser';
 
 const parseUrl = (sourceUrl, targetPath) => {
@@ -21,6 +22,24 @@ const parseUrl = (sourceUrl, targetPath) => {
     outputPath: path.resolve(__dirname, targetPath),
     baseUrl: parsedUrl.href.replace(parsedUrl.pathname, ''),
   };
+};
+
+const opts = {
+  interval: 80,
+  preText: 'Downloading',
+  frames: [
+    '[      ]',
+    '[*     ]',
+    '[**    ]',
+    '[ **   ]',
+    '[  **  ]',
+    '[   ** ]',
+    '[    **]',
+    '[     *]',
+  ],
+  symbol: {
+    success: ' '.repeat(7),
+  },
 };
 
 const loader = async (sourceUrl, targetPath = '.') => {
@@ -37,11 +56,21 @@ const loader = async (sourceUrl, targetPath = '.') => {
     // TODO: same as previous
     await fs.mkdir(path.join(tmpFolder, config.filePath));
     await fs.mkdir(path.join(targetPath, config.filePath));
-    const load = link =>
-      axios.get(link, { baseURL: config.baseUrl, responseType: 'arraybuffer' })
-        .then(response => fs.writeFile(path.join(tmpFolder,
-          config.filePath, path.basename(link)), response.data));
-    await Promise.all(links.map(load));
+    if (links.length > 0) {
+      const spinner = new Multispinner(links, opts);
+      const load = async (link) => {
+        try {
+          const result = await axios.get(link, { baseURL: config.baseUrl, responseType: 'arraybuffer' });
+          spinner.success(link);
+          return fs.writeFile(path.join(tmpFolder,
+            config.filePath, path.basename(link)), result.data);
+        } catch (e) {
+          spinner.error(link);
+          return e;
+        }
+      };
+      await Promise.all(links.map(load));
+    }
     // TODO: recursive move files routing needed
     await fs.rename(path.join(tmpFolder, config.filename), path.join(targetPath, config.filename));
     const moveSubFiles = link => fs.rename(
